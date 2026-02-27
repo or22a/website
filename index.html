@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YOUR NAME — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink: #ff71ce;
+      --cyan: #01cdfe;
+      --purple: #b967ff;
+      --yellow: #fffb96;
+      --dark: #0d0015;
+      --mid: #1a0030;
+      --grid: #2a004a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 16px; height: 16px;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, background 0.2s;
+      mix-blend-mode: screen;
+    }
+    .cursor.clicked { background: var(--cyan); transform: translate(-50%,-50%) scale(2); }
+
+    /* Scanlines overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    /* Grid floor */
+    .grid-floor {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 55%;
+      background:
+        linear-gradient(to bottom, transparent 0%, var(--dark) 100%),
+        repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 80px),
+        repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 80px);
+      background-size: auto, 80px 80px, 80px 80px;
+      transform: perspective(600px) rotateX(60deg);
+      transform-origin: bottom center;
+      animation: gridMove 4s linear infinite;
+    }
+    @keyframes gridMove {
+      from { background-position: auto, 0 0, 0 0; }
+      to   { background-position: auto, 0 80px, 0 80px; }
+    }
+
+    /* Sun */
+    .sun {
+      position: absolute;
+      bottom: 38%;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, var(--yellow) 0%, #ff6ec7 50%, var(--purple) 100%);
+      box-shadow: 0 0 80px 30px rgba(255,113,206,0.4), 0 0 160px 60px rgba(185,103,255,0.2);
+      overflow: hidden;
+    }
+    .sun::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        var(--dark) 0px,
+        var(--dark) 8px,
+        transparent 8px,
+        transparent 24px
+      );
+      transform: translateY(55%);
+    }
+
+    /* Mountains */
+    .mountains {
+      position: absolute;
+      bottom: 36%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .mountains svg { width: 100%; max-width: 900px; }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      margin-bottom: 12rem;
+    }
+
+    .glitch-name {
+      font-family: 'VT323', monospace;
+      font-size: clamp(4rem, 12vw, 9rem);
+      color: var(--cyan);
+      text-shadow:
+        3px 0 var(--pink),
+        -3px 0 var(--purple),
+        0 0 40px var(--cyan);
+      position: relative;
+      animation: glitch 5s infinite;
+      letter-spacing: 0.05em;
+    }
+    @keyframes glitch {
+      0%, 90%, 100% { text-shadow: 3px 0 var(--pink), -3px 0 var(--purple), 0 0 40px var(--cyan); transform: none; }
+      92% { text-shadow: -4px 0 var(--pink), 4px 0 var(--purple), 0 0 40px var(--cyan); transform: skewX(-2deg); }
+      94% { text-shadow: 4px 0 var(--pink), -4px 0 var(--purple), 0 0 40px var(--cyan); transform: skewX(2deg); }
+      96% { text-shadow: 3px 0 var(--pink), -3px 0 var(--purple), 0 0 40px var(--cyan); transform: none; }
+    }
+
+    .tagline {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+      color: var(--pink);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.6s forwards;
+    }
+
+    .hero-role {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--yellow);
+      letter-spacing: 0.2em;
+      margin-top: 1rem;
+      opacity: 0;
+      animation: fadeUp 1s 1s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--purple);
+      letter-spacing: 0.3em;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: linear-gradient(to bottom, rgba(13,0,21,0.95), transparent);
+    }
+    .nav-logo {
+      font-family: 'VT323', monospace;
+      font-size: 1.8rem;
+      color: var(--cyan);
+      text-shadow: 0 0 15px var(--cyan);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: #ccc;
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--pink);
+      text-shadow: 0 0 10px var(--pink);
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 6rem 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      color: #fff;
+      text-shadow: 2px 2px var(--purple), 0 0 30px rgba(185,103,255,0.5);
+      margin-bottom: 2.5rem;
+      line-height: 1;
+    }
+
+    /* Divider */
+    .neon-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--pink), var(--cyan), transparent);
+      margin: 1rem 0 3rem;
+      box-shadow: 0 0 10px var(--pink);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .about-text { font-size: 1.15rem; line-height: 1.8; color: #ccc; }
+    .about-text p { margin-bottom: 1rem; }
+    .about-text strong { color: var(--pink); }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .stat-box {
+      border: 1px solid var(--purple);
+      padding: 1.2rem;
+      text-align: center;
+      position: relative;
+      background: rgba(185,103,255,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-box:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 20px rgba(185,103,255,0.3);
+    }
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 10%; right: 10%;
+      height: 2px;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .stat-num {
+      font-family: 'VT323', monospace;
+      font-size: 2.5rem;
+      color: var(--cyan);
+    }
+    .stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--purple);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ── WORK ── */
+    #work { max-width: 1100px; }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .project-card {
+      border: 1px solid rgba(1,205,254,0.3);
+      background: linear-gradient(135deg, rgba(13,0,21,0.9), rgba(26,0,48,0.9));
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(1,205,254,0.08), transparent);
+      transition: left 0.5s;
+    }
+    .project-card:hover::before { left: 100%; }
+    .project-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 40px rgba(1,205,254,0.2), 0 0 0 1px var(--cyan);
+    }
+    .project-num {
+      font-family: 'VT323', monospace;
+      font-size: 3.5rem;
+      color: rgba(185,103,255,0.3);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .project-title {
+      font-family: 'VT323', monospace;
+      font-size: 1.8rem;
+      color: var(--pink);
+      margin-bottom: 0.75rem;
+    }
+    .project-desc {
+      font-size: 0.95rem;
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--purple);
+      color: var(--purple);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SKILLS ── */
+    .skills-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      border-left: 2px solid var(--pink);
+      background: rgba(255,113,206,0.05);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      color: #ddd;
+      transition: background 0.2s, color 0.2s;
+    }
+    .skill-item:hover {
+      background: rgba(255,113,206,0.1);
+      color: var(--pink);
+    }
+    .skill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 6px var(--pink);
+      flex-shrink: 0;
+    }
+
+    /* ── CONTACT ── */
+    #contact { text-align: center; }
+    .contact-email {
+      font-family: 'VT323', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--cyan);
+      text-decoration: none;
+      text-shadow: 0 0 20px var(--cyan);
+      letter-spacing: 0.1em;
+      transition: text-shadow 0.3s;
+      display: inline-block;
+      margin: 2rem 0;
+    }
+    .contact-email:hover { text-shadow: 0 0 40px var(--cyan), 0 0 80px rgba(1,205,254,0.3); }
+
+    .social-links { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 2rem; }
+    .social-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--purple);
+      text-decoration: none;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid var(--purple);
+      padding: 0.6rem 1.5rem;
+      transition: all 0.2s;
+    }
+    .social-link:hover {
+      background: var(--purple);
+      color: var(--dark);
+      box-shadow: 0 0 20px var(--purple);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(185,103,255,0.4);
+      letter-spacing: 0.3em;
+      border-top: 1px solid rgba(185,103,255,0.1);
+    }
+
+    /* ── Floating particles ── */
+    .particles {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: var(--cyan);
+      animation: float linear infinite;
+      opacity: 0.6;
+    }
+    @keyframes float {
+      from { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.6; }
+      to   { transform: translateY(-10vh) translateX(60px); opacity: 0; }
+    }
+
+    @media (max-width: 700px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.2rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .about-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">YN</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="sun"></div>
+  <div class="mountains">
+    <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+      <polygon points="0,200 200,60 400,200" fill="#0d0015"/>
+      <polygon points="150,200 350,20 550,200" fill="#0d0015"/>
+      <polygon points="400,200 600,50 800,200" fill="#0d0015"/>
+      <polygon points="600,200 800,80 1000,200" fill="#0d0015"/>
+      <polygon points="800,200 1000,30 1200,200" fill="#0d0015"/>
+      <!-- Outlines with glow -->
+      <polyline points="0,200 200,60 400,200" fill="none" stroke="#ff71ce" stroke-width="1" opacity="0.6"/>
+      <polyline points="150,200 350,20 550,200" fill="none" stroke="#b967ff" stroke-width="1" opacity="0.6"/>
+      <polyline points="400,200 600,50 800,200" fill="none" stroke="#ff71ce" stroke-width="1" opacity="0.6"/>
+      <polyline points="600,200 800,80 1000,200" fill="none" stroke="#b967ff" stroke-width="1" opacity="0.6"/>
+      <polyline points="800,200 1000,30 1200,200" fill="none" stroke="#ff71ce" stroke-width="1" opacity="0.6"/>
+    </svg>
+  </div>
+  <div class="grid-floor"></div>
+
+  <div class="hero-content">
+    <div class="glitch-name">YOUR NAME</div>
+    <div class="tagline">✦ Creative Developer ✦</div>
+    <div class="hero-role">Building digital experiences from the future</div>
+  </div>
+  <div class="scroll-hint">▼ SCROLL ▼</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">// 001</div>
+  <div class="section-title">ABOUT_ME</div>
+  <div class="neon-divider"></div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>Hey! I'm <strong>Your Name</strong>, a developer and designer based in <strong>Your City</strong>. I build things for the web that are fast, beautiful, and a little bit strange.</p>
+      <p>I'm obsessed with the intersection of <strong>nostalgia and futurism</strong> — taking the aesthetics of the past and rebuilding them with modern technology.</p>
+      <p>When I'm not coding, you'll find me listening to synth music, collecting vintage tech, or exploring generative art.</p>
+    </div>
+    <div class="about-stats">
+      <div class="stat-box">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years Exp</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Curiosity</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">01</div>
+        <div class="stat-label">You</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-label">// 002</div>
+  <div class="section-title">SELECTED_WORK</div>
+  <div class="neon-divider"></div>
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="project-num">01</div>
+      <div class="project-title">Project Alpha</div>
+      <div class="project-desc">A short description of what this project does and why it's cool. Replace this with your real work.</div>
+      <div class="project-tags">
+        <span class="tag">React</span>
+        <span class="tag">Node.js</span>
+        <span class="tag">Design</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-num">02</div>
+      <div class="project-title">Project Beta</div>
+      <div class="project-desc">Another cool project description here. Talk about the problem you solved or what makes it unique.</div>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">API</span>
+        <span class="tag">Data</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-num">03</div>
+      <div class="project-title">Project Gamma</div>
+      <div class="project-desc">Keep adding your projects here. Each card is easy to duplicate — just copy the HTML block.</div>
+      <div class="project-tags">
+        <span class="tag">Three.js</span>
+        <span class="tag">WebGL</span>
+        <span class="tag">Art</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">// 003</div>
+  <div class="section-title">TECH_STACK</div>
+  <div class="neon-divider"></div>
+  <div class="skills-list">
+    <div class="skill-item"><span class="skill-dot"></span>HTML / CSS</div>
+    <div class="skill-item"><span class="skill-dot"></span>JavaScript</div>
+    <div class="skill-item"><span class="skill-dot"></span>React</div>
+    <div class="skill-item"><span class="skill-dot"></span>Node.js</div>
+    <div class="skill-item"><span class="skill-dot"></span>Python</div>
+    <div class="skill-item"><span class="skill-dot"></span>Figma</div>
+    <div class="skill-item"><span class="skill-dot"></span>Git / GitHub</div>
+    <div class="skill-item"><span class="skill-dot"></span>Your Skill Here</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">// 004</div>
+  <div class="section-title">CONNECT</div>
+  <div class="neon-divider"></div>
+  <p style="color:#aaa; font-size:1.1rem; line-height:1.7;">Have a project in mind? Want to collaborate?<br>My inbox is always open.</p>
+  <a class="contact-email" href="mailto:you@yourdomain.com">you@yourdomain.com</a>
+  <div class="social-links">
+    <a class="social-link" href="#">GitHub</a>
+    <a class="social-link" href="#">LinkedIn</a>
+    <a class="social-link" href="#">Twitter</a>
+    <a class="social-link" href="#">Dribbble</a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 YOUR NAME — MADE WITH NEON & NOSTALGIA</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.addEventListener('mousedown', () => cursor.classList.add('clicked'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('clicked'));
+
+  // Particles
+  const container = document.getElementById('particles');
+  const colors = ['#01cdfe', '#ff71ce', '#b967ff', '#fffb96'];
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.boxShadow = `0 0 4px ${p.style.background}`;
+    container.appendChild(p);
+  }
+
+  // Glitch nav logo on scroll
+  const logo = document.querySelector('.nav-logo');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+      logo.style.textShadow = '0 0 20px #01cdfe, 2px 0 #ff71ce, -2px 0 #b967ff';
+    } else {
+      logo.style.textShadow = '0 0 15px #01cdfe';
+    }
+  });
+</script>
+</body>
+</html>
